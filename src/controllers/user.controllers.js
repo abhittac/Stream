@@ -53,3 +53,58 @@ export const registerUser = async (req, res, next) => {
     next(error);
   }
 };
+export const loginUser = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validate required fields
+    if (!email || !password) {
+      throw new ApiError("Email and password are required", 400);
+    }
+
+    // Check if user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new ApiError("Invalid email or password", 401);
+    }
+
+    // Verify password
+    const isPasswordCorrect = await user.isPasswordCorrect(password);
+    if (!isPasswordCorrect) {
+      throw new ApiError("Invalid email or password", 401);
+    }
+
+    // Generate tokens
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
+
+    // Save the refresh token in the database
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    // Set tokens as HTTP-only cookies
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
+      secure: process.env.NODE_ENV === "production", // Ensures cookies are sent over HTTPS in production
+      sameSite: "strict", // Prevents CSRF attacks
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    // Send success response without tokens in the body
+    const response = new ApiResponse(200, "Login successful", {
+      message: "Tokens are set in cookies",
+      refreshToken,
+      accessToken,
+    });
+    return res.status(response.statusCode).json(response);
+  } catch (error) {
+    next(error);
+  }
+};
