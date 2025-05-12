@@ -4,27 +4,23 @@ const playlistSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
+      required: [true, "Playlist name is required"],
       trim: true,
-    },
-    description: {
-      type: String,
-      trim: true,
-    },
-    owner: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Reference to the User model
-      required: true,
     },
     videos: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Video", // Reference to the Video model
+        ref: "Video",
       },
     ],
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   {
-    timestamps: true, // Automatically adds `createdAt` and `updatedAt` fields
+    timestamps: true, // Automatically adds createdAt and updatedAt fields
   }
 );
 

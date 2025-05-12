@@ -2,19 +2,19 @@ import mongoose from "mongoose";
 
 const subscriptionSchema = new mongoose.Schema(
   {
-    subscriber: {
+    channelId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Reference to the User model (the subscriber)
+      ref: "User", // Assuming channels are users
       required: true,
     },
-    channel: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Reference to the User model (the channel being subscribed to)
+      ref: "User",
       required: true,
     },
   },
   {
-    timestamps: true, // Automatically adds `createdAt` and `updatedAt` fields
+    timestamps: true, // Automatically adds createdAt and updatedAt fields
   }
 );
 

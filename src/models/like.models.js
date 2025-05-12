@@ -1,24 +1,24 @@
 import mongoose from "mongoose";
 
-const playlistSchema = new mongoose.Schema(
+const likeSchema = new mongoose.Schema(
   {
-    videos: {
+    videoId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Video", // Reference to the Video model
+      ref: "Video",
+      required: true,
     },
-    comment: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Comment", // Reference to the User model
-    },
-
-    likedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Reference to the User model
+      ref: "User",
+      required: true,
     },
   },
   {
-    timestamps: true, // Automatically adds `createdAt` and `updatedAt` fields
+    timestamps: true, // Automatically adds createdAt and updatedAt fields
   }
 );
 
-export const Playlist = mongoose.model("Playlist", playlistSchema);
+// Ensure a user can like a video only once
+likeSchema.index({ videoId: 1, userId: 1 }, { unique: true });
+
+export const Like = mongoose.model("Like", likeSchema);
